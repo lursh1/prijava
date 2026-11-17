@@ -95,10 +95,37 @@
       geslo.type = this.checked ? "text" : "password";
     });
 
-    form.addEventListener("submit", function (e) {
+    // Sem vpiši naslov svojega strežnika
+    const API_URL = "http://localhost:3000/login";
+
+    const gumb = form.querySelector("button");
+
+    form.addEventListener("submit", async function (e) {
       e.preventDefault();
-      // Tukaj bi podatke poslali na strežnik, npr. z fetch().
-      sporocilo.textContent = "Vnos prejet: " + form.username.value;
+      gumb.disabled = true;
+      sporocilo.textContent = "Pošiljam ...";
+
+      try {
+        const odgovor = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: form.username.value,
+            password: form.password.value
+          })
+        });
+
+        if (odgovor.ok) {
+          sporocilo.textContent = "Prijava uspešna.";
+        } else {
+          sporocilo.textContent = "Prijava ni uspela (koda " + odgovor.status + ").";
+        }
+      } catch (napaka) {
+        sporocilo.textContent = "Povezava s strežnikom ni uspela.";
+        console.error(napaka);
+      } finally {
+        gumb.disabled = false;
+      }
     });
   </script>
 </body>
